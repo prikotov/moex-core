@@ -1,0 +1,37 @@
+parameters:
+    moex.base_url: '%env(MOEX_BASE_URL)%'
+    log.level: '%env(LOG_LEVEL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: true
+        bind:
+            string $baseUrl: '%moex.base_url%'
+
+    Moex\Skill\:
+        resource: '../src/*'
+        exclude:
+            - '../src/Service/Security/Dto/*'
+            - '../src/Service/Security/*Result.php'
+
+    Moex\Skill\Command\:
+        resource: '../src/Command/*'
+        tags: ['console.command']
+
+    GuzzleHttp\Client:
+        class: GuzzleHttp\Client
+
+    Psr\Log\LoggerInterface:
+        class: Monolog\Logger
+        arguments:
+            $name: 'moex'
+        calls:
+            - pushHandler: ['@Monolog\Handler\StreamHandler']
+
+    Monolog\Handler\StreamHandler:
+        class: Monolog\Handler\StreamHandler
+        arguments:
+            $stream: 'php://stdout'
+            $level: '%log.level%'
