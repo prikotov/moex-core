@@ -1,40 +1,44 @@
-# MOEX Skill
+# MOEX CLI
 
-Консольное приложение на PHP для работы с MOEX ISS API.
+CLI утилита для работы с MOEX ISS API (Московская Биржа).
 
 ## Установка
 
 ```bash
-composer install
+composer require prikotov/moex-core:@dev
 ```
 
 ## Использование
 
 ```bash
-./bin/moex security:specification SBER
-./bin/moex security:trade-data SBER
-./bin/moex security:aggregates SBER
-./bin/moex security:indices SBER
+./vendor/bin/moex security:specification SBER
+./vendor/bin/moex security:trade-data SBER
+./vendor/bin/moex security:aggregates SBER
+./vendor/bin/moex security:indices SBER
 ```
 
 ## Команды
 
 | Команда | Описание |
 |---------|----------|
-| `security:specification <тикер>` | Получить спецификацию инструмента |
-| `security:trade-data <тикер>` | Получить текущие рыночные данные |
-| `security:aggregates <тикер> [--date=YYYY-MM-DD]` | Получить агрегированные итоги торгов |
-| `security:indices <тикер>` | Получить список индексов МосБиржи, в которые входит бумага |
+| `security:specification <тикер>` | Спецификация инструмента (ISIN, List Level, Type) |
+| `security:trade-data <тикер>` | Текущие рыночные данные (Last, Open/High/Low, Volume) |
+| `security:aggregates <тикер> [--date=YYYY-MM-DD]` | Агрегированные итоги торгов |
+| `security:indices <тикер>` | Индексы МосБиржи, в которые входит бумага |
 
 ## Разработка
 
 ```bash
-composer test       # Запуск тестов
-composer cs-check   # Проверка PSR-12
-composer cs-fix     # Исправление PSR-12
-composer stan       # PHPStan
-composer psalm      # Psalm
+composer install
+composer test
+composer cs-check
+composer stan
+composer psalm
 ```
+
+## API Reference
+
+MOEX ISS API: https://iss.moex.com/iss/reference/
 
 ## Лицензия
 
