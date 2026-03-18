@@ -1,6 +1,6 @@
 {
-    "name": "moex/skill",
-    "description": "PHP console application for MOEX ISS API integration",
+    "name": "moex/cli",
+    "description": "CLI tool for MOEX ISS API - Moscow Exchange market data",
     "type": "library",
     "license": "MIT",
     "keywords": ["moex", "moscow exchange", "api", "cli", "console", "stocks", "bonds", "securities"],
