@@ -1,5 +1,5 @@
 {
-    "name": "moex/cli",
+    "name": "prikotov/moex-core",
     "description": "CLI tool for MOEX ISS API - Moscow Exchange market data",
     "type": "library",
     "license": "MIT",
