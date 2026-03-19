@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Security\Dto;
+namespace Moex\Core\Service\Security\Dto;
 
 final readonly class SecurityTradeDataDto
 {

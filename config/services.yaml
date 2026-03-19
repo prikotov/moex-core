@@ -10,7 +10,7 @@ services:
         bind:
             string $baseUrl: '%moex.base_url%'
 
-    Moex\Skill\:
+    Moex\Core\:
         resource: '../src/*'
         exclude:
             - '../src/Service/Security/Dto/*'
@@ -18,7 +18,7 @@ services:
             - '../src/Service/Schedule/Dto/*'
             - '../src/Service/Schedule/*Result.php'
 
-    Moex\Skill\Command\:
+    Moex\Core\Command\:
         resource: '../src/Command/*'
         tags: ['console.command']
 

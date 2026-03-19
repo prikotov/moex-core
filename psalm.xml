@@ -13,4 +13,20 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <UnusedClass errorLevel="suppress">
+            <errorLevel type="suppress">
+                <directory name="src/Command"/>
+                <directory name="src/Service"/>
+                <directory name="src/Component"/>
+            </errorLevel>
+        </UnusedClass>
+        <PossiblyUnusedProperty errorLevel="suppress"/>
+        <MissingOverrideAttribute errorLevel="suppress"/>
+        <ClassMustBeFinal errorLevel="suppress"/>
+        <MixedArrayAccess errorLevel="suppress"/>
+        <MixedAssignment errorLevel="suppress"/>
+        <MixedArgument errorLevel="suppress"/>
+    </issueHandlers>
 </psalm>

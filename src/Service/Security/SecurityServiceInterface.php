@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Security;
+namespace Moex\Core\Service\Security;
 
 use Generator;
-use Moex\Skill\Service\Security\Dto\SecurityAggregateDto;
-use Moex\Skill\Service\Security\Dto\SecurityIndexDto;
-use Moex\Skill\Service\Security\Dto\SecuritySpecificationDto;
-use Moex\Skill\Service\Security\Dto\SecurityTradeDataDto;
+use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
+use Moex\Core\Service\Security\Dto\SecurityIndexDto;
+use Moex\Core\Service\Security\Dto\SecuritySpecificationDto;
+use Moex\Core\Service\Security\Dto\SecurityTradeDataDto;
 
 interface SecurityServiceInterface
 {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Command;
+namespace Moex\Core\Command;
 
-use Moex\Skill\Service\Schedule\ScheduleServiceInterface;
+use Moex\Core\Service\Schedule\ScheduleServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -35,13 +35,15 @@ final class ScheduleCommand extends Command
     #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string|null $engine */
         $engine = $input->getOption('engine');
+        /** @var string|null $market */
         $market = $input->getOption('market');
 
         $result = $this->scheduleService->getTradingSchedule($engine, $market);
 
         if (!$result->success) {
-            $output->writeln(sprintf('<error>%s</error>', $result->error));
+            $output->writeln(sprintf('<error>%s</error>', $result->error ?? 'Unknown error'));
             return Command::FAILURE;
         }
 
@@ -60,7 +62,7 @@ final class ScheduleCommand extends Command
                 $session->title
             ));
 
-            if ($session->auctionStart && $session->auctionEnd) {
+            if ($session->auctionStart !== null && $session->auctionEnd !== null) {
                 $output->writeln(sprintf(
                     '  Auction: %s - %s',
                     $session->auctionStart,
@@ -68,7 +70,7 @@ final class ScheduleCommand extends Command
                 ));
             }
 
-            if ($session->startTime && $session->endTime) {
+            if ($session->startTime !== null && $session->endTime !== null) {
                 $output->writeln(sprintf(
                     '  Main session: %s - %s',
                     $session->startTime,
@@ -76,7 +78,7 @@ final class ScheduleCommand extends Command
                 ));
             }
 
-            if ($session->clearingStart && $session->clearingEnd) {
+            if ($session->clearingStart !== null && $session->clearingEnd !== null) {
                 $output->writeln(sprintf(
                     '  Clearing: %s - %s',
                     $session->clearingStart,
@@ -84,7 +86,7 @@ final class ScheduleCommand extends Command
                 ));
             }
 
-            if ($session->eveningStart && $session->eveningEnd) {
+            if ($session->eveningStart !== null && $session->eveningEnd !== null) {
                 $output->writeln(sprintf(
                     '  Evening session: %s - %s',
                     $session->eveningStart,

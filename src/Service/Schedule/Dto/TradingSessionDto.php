@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Schedule\Dto;
+namespace Moex\Core\Service\Schedule\Dto;
 
 final readonly class TradingSessionDto
 {

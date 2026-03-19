@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Schedule;
+namespace Moex\Core\Service\Schedule;
 
-use Moex\Skill\Service\Schedule\Dto\ScheduleResult;
+use Moex\Core\Service\Schedule\Dto\ScheduleResult;
 
 interface ScheduleServiceInterface
 {
