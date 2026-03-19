@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Command;
+namespace Moex\Core\Command;
 
-use Moex\Skill\Service\Security\SecurityServiceInterface;
+use Moex\Core\Service\Security\SecurityServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -36,13 +36,15 @@ final class SecurityAggregatesCommand extends Command
     #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /** @var string $security */
         $security = $input->getArgument('security');
+        /** @var string|null $date */
         $date = $input->getOption('date');
 
         $result = $this->securityService->getAggregates($security, $date);
 
         if (!$result->success) {
-            $output->writeln(sprintf('<error>%s</error>', $result->error));
+            $output->writeln(sprintf('<error>%s</error>', $result->error ?? 'Unknown error'));
             return Command::FAILURE;
         }
 

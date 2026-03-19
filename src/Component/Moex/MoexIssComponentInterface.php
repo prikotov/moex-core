@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Component\Moex;
+namespace Moex\Core\Component\Moex;
 
-use Moex\Skill\Exception\InfrastructureExceptionInterface;
+use Moex\Core\Exception\InfrastructureExceptionInterface;
 
 interface MoexIssComponentInterface
 {
     /**
+     * @param array<string> $urlData
+     * @param array<string, string|int> $query
      * @throws InfrastructureExceptionInterface
      */
     public function getContent(string $url, array $urlData, array $query): ?string;

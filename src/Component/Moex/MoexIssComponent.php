@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Component\Moex;
+namespace Moex\Core\Component\Moex;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use Moex\Skill\Exception\InfrastructureException;
-use Moex\Skill\Exception\InfrastructureExceptionInterface;
+use Moex\Core\Exception\InfrastructureException;
+use Moex\Core\Exception\InfrastructureExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 class MoexIssComponent implements MoexIssComponentInterface
@@ -26,6 +26,10 @@ class MoexIssComponent implements MoexIssComponentInterface
         ]);
     }
 
+    /**
+     * @param array<string> $urlData
+     * @param array<string, string|int> $query
+     */
     public function getContent(string $url, array $urlData, array $query): ?string
     {
         $url = sprintf($url, ...$urlData);

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Security;
+namespace Moex\Core\Service\Security;
 
-use Moex\Skill\Component\Moex\MoexIssComponentInterface;
-use Moex\Skill\Exception\InfrastructureExceptionInterface;
-use Moex\Skill\Service\Security\Dto\SecurityAggregateDto;
-use Moex\Skill\Service\Security\Dto\SecurityIndexDto;
-use Moex\Skill\Service\Security\Dto\SecuritySpecificationDto;
-use Moex\Skill\Service\Security\Dto\SecurityTradeDataDto;
+use Moex\Core\Component\Moex\MoexIssComponentInterface;
+use Moex\Core\Exception\InfrastructureExceptionInterface;
+use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
+use Moex\Core\Service\Security\Dto\SecurityIndexDto;
+use Moex\Core\Service\Security\Dto\SecuritySpecificationDto;
+use Moex\Core\Service\Security\Dto\SecurityTradeDataDto;
 use Override;
 
 final class SecurityService implements SecurityServiceInterface
@@ -35,7 +35,7 @@ final class SecurityService implements SecurityServiceInterface
             );
         }
 
-        $data = json_decode($content, true);
+        $data = json_decode($content ?? '', true);
         $specifications = [];
 
         $description = $data[1]['description'] ?? [];
@@ -71,7 +71,8 @@ final class SecurityService implements SecurityServiceInterface
                 [$security],
                 [
                     'iss.only' => 'securities,marketdata',
-                    'securities.columns' => 'BOARDID,BOARDNAME,SECID,SHORTNAME,SECNAME,PREVPRICE,PREVDATE,PREVLEGALCLOSEPRICE',
+                    'securities.columns' => 'BOARDID,BOARDNAME,SECID,SHORTNAME,' .
+                        'SECNAME,PREVPRICE,PREVDATE,PREVLEGALCLOSEPRICE',
                     'marketdata.columns' => 'SECID,BOARDID,OPEN,LOW,HIGH,LAST,VALTODAY,TIME,SYSTIME',
                 ]
             );
@@ -82,7 +83,7 @@ final class SecurityService implements SecurityServiceInterface
             );
         }
 
-        $data = json_decode($content, true);
+        $data = json_decode($content ?? '', true);
         $securities = [];
         $marketData = [];
 
@@ -151,7 +152,7 @@ final class SecurityService implements SecurityServiceInterface
             );
         }
 
-        $data = json_decode($content, true);
+        $data = json_decode($content ?? '', true);
         $aggregates = [];
 
         foreach ($data[1]['aggregates'] ?? [] as $item) {
@@ -189,7 +190,7 @@ final class SecurityService implements SecurityServiceInterface
             );
         }
 
-        $data = json_decode($content, true);
+        $data = json_decode($content ?? '', true);
         $indices = [];
 
         foreach ($data[1]['indices'] ?? [] as $item) {
@@ -216,6 +217,10 @@ final class SecurityService implements SecurityServiceInterface
         return $dt === false ? null : $dt->format('Y-m-d');
     }
 
+    /**
+     * @param array<array{name: string, value: string}> $description
+     * @return array<string, string>
+     */
     private function parseDescription(array $description): array
     {
         $fields = [];

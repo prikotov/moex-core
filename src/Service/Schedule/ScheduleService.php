@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Service\Schedule;
+namespace Moex\Core\Service\Schedule;
 
-use Moex\Skill\Component\Moex\MoexIssComponentInterface;
-use Moex\Skill\Exception\InfrastructureExceptionInterface;
-use Moex\Skill\Service\Schedule\Dto\ScheduleResult;
-use Moex\Skill\Service\Schedule\Dto\TradingSessionDto;
+use Moex\Core\Component\Moex\MoexIssComponentInterface;
+use Moex\Core\Exception\InfrastructureExceptionInterface;
+use Moex\Core\Service\Schedule\Dto\ScheduleResult;
+use Moex\Core\Service\Schedule\Dto\TradingSessionDto;
 use Override;
 
 final class ScheduleService implements ScheduleServiceInterface
@@ -56,6 +56,7 @@ final class ScheduleService implements ScheduleServiceInterface
             );
         }
 
+        /** @var array{1?: array{sessions?: array<int, array{engine?: string, market?: string, begintime?: string, endtime?: string, openingtime?: string, closingtime?: string, eveningbegintime?: string, eveningendtime?: string, clearingbegintime?: string, clearingendtime?: string}>}} $data */
         $data = json_decode($content ?? '', true);
         $sessions = [];
 

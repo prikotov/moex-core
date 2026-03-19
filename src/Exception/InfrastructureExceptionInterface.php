@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Moex\Skill\Exception;
+namespace Moex\Core\Exception;
 
 use Throwable;
 
