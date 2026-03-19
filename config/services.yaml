@@ -17,6 +17,8 @@ services:
             - '../src/Service/Security/*Result.php'
             - '../src/Service/Schedule/Dto/*'
             - '../src/Service/Schedule/*Result.php'
+            - '../src/Service/Candle/Dto/*'
+            - '../src/Service/Candle/*Result.php'
 
     Moex\Core\Command\:
         resource: '../src/Command/*'
