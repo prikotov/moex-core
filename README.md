@@ -15,6 +15,7 @@ composer require prikotov/moex-core:@dev
 ./vendor/bin/moex security:trade-data SBER
 ./vendor/bin/moex security:aggregates SBER
 ./vendor/bin/moex security:indices SBER
+./vendor/bin/moex security:candles SBER
 ```
 
 ## Команды
@@ -25,6 +26,20 @@ composer require prikotov/moex-core:@dev
 | `security:trade-data <тикер>` | Текущие рыночные данные (Last, Open/High/Low, Volume) |
 | `security:aggregates <тикер> [--date=YYYY-MM-DD]` | Агрегированные итоги торгов |
 | `security:indices <тикер>` | Индексы МосБиржи, в которые входит бумага |
+| `security:candles <тикер> [options]` | Исторические свечи (OHLCV) |
+
+### Свечи
+
+```bash
+moex security:candles SBER --from=2024-01-01 --to=2024-01-31 --interval=60 --limit=100
+```
+
+| Опция | Описание | По умолчанию |
+|-------|----------|--------------|
+| --from, -f | Начало периода | нет |
+| --to, -t | Конец периода | нет |
+| --interval, -i | Интервал (1, 10, 60, 24, 7, 31 мин) | 60 |
+| --limit, -l | Макс. свечей | 100 |
 
 ## Разработка
 
