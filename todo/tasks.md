@@ -60,7 +60,39 @@ GET /statistics/engines/stock/markets/index/analytics/{INDEXID}.json?secid={SECI
 
 ## P1 - Важно
 
-### 4. История индекса (свечи)
+### 4. Торговый календарь ✅
+**Оценка:** 2h
+
+**Endpoint:**
+```
+GET /engines/stock/trading.json
+```
+
+**Возвращает:**
+- Расписание торгов по рынкам
+- Аукционы открытия/закрытия
+- Вечерняя сессия
+- Клиринг
+
+**Задачи:**
+- [x] `Service/Schedule/ScheduleServiceInterface.php`
+- [x] `Service/Schedule/ScheduleService.php`
+- [x] `Service/Schedule/Dto/TradingSessionDto.php`
+- [x] `Service/Schedule/Dto/ScheduleResult.php`
+- [x] Команда `schedule [--engine=stock] [--market=shares]`
+- [ ] Тесты
+
+**Пример:**
+```bash
+./bin/moex schedule --engine=stock --market=shares
+# STOCK / Акции
+#   Main session: 10:00 - 18:40
+#   Evening session: 19:00 - 23:50
+```
+
+---
+
+### 5. История индекса (свечи)
 **Оценка:** 3h
 
 **Endpoint:**
@@ -126,12 +158,13 @@ src/Service/
 
 ## Команды
 
-| Команда | Описание | Приоритет |
-|---------|----------|-----------|
-| `candles <ticker>` | Исторические свечи | P0 |
-| `index:weight <ticker> <index>` | Вес в индексе | P0 |
-| `index:history <index>` | История индекса | P1 |
-| `index:composition <index>` | Состав индекса | P1 |
+| Команда | Описание | Приоритет | Статус |
+|---------|----------|-----------|--------|
+| `candles <ticker>` | Исторические свечи | P0 | |
+| `index:weight <ticker> <index>` | Вес в индексе | P0 | |
+| `schedule` | Торговый календарь | P1 | ✅ |
+| `index:history <index>` | История индекса | P1 | |
+| `index:composition <index>` | Состав индекса | P1 | |
 
 ---
 
