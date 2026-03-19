@@ -49,10 +49,16 @@
     },
     "scripts": {
         "test": "phpunit",
-        "cs-check": "phpcs",
-        "cs-fix": "phpcbf",
+        "cs-check": "phpcs --standard=devops/phpcs/MoexCodingStandard/ruleset.xml src tests",
+        "cs-fix": "phpcbf --standard=devops/phpcs/MoexCodingStandard/ruleset.xml src tests",
         "stan": "phpstan analyse",
-        "psalm": "psalm"
+        "psalm": "psalm",
+        "post-install-cmd": [
+            "@php vendor/bin/phpcs --config-set installed_paths $(pwd)/devops/phpcs"
+        ],
+        "post-update-cmd": [
+            "@php vendor/bin/phpcs --config-set installed_paths $(pwd)/devops/phpcs"
+        ]
     },
     "extra": {
         "branch-alias": {

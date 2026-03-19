@@ -15,6 +15,11 @@
     </projectFiles>
 
     <issueHandlers>
+        <PropertyNotSetInConstructor errorLevel="suppress">
+            <errorLevel type="suppress">
+                <directory name="tests"/>
+            </errorLevel>
+        </PropertyNotSetInConstructor>
         <UnusedClass errorLevel="suppress">
             <errorLevel type="suppress">
                 <directory name="src/Command"/>
