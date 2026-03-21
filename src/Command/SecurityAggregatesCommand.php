@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Moex\Core\Command;
 
+use Moex\Core\Helper\OutputFormatTrait;
 use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
 use Moex\Core\Service\Security\SecurityServiceInterface;
 use Override;
@@ -20,6 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final class SecurityAggregatesCommand extends Command
 {
+    use OutputFormatTrait;
+
     public function __construct(
         private readonly SecurityServiceInterface $securityService,
     ) {
@@ -35,7 +38,7 @@ final class SecurityAggregatesCommand extends Command
             ->addOption('sort', 's', InputOption::VALUE_OPTIONAL, 'Sort by: value, volume, trades, date', 'date')
             ->addOption('order', 'o', InputOption::VALUE_OPTIONAL, 'Sort order: asc, desc', 'desc')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limit number of results', '0')
-            ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: table, json', 'table');
+            ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: table, json, csv, md', 'table');
     }
 
     #[Override]
@@ -48,7 +51,7 @@ final class SecurityAggregatesCommand extends Command
         $sort = $input->getOption('sort');
         $order = $input->getOption('order');
         $limit = (int)$input->getOption('limit');
-        $format = $input->getOption('format');
+        $format = $this->getFormat($input);
 
         $result = $this->securityService->getAggregates($security, $date);
 
@@ -62,8 +65,23 @@ final class SecurityAggregatesCommand extends Command
             $aggregates = array_slice($aggregates, 0, $limit);
         }
 
-        if ($format === 'json') {
-            return $this->outputJson($output, $security, $aggregates);
+        if ($format !== 'table') {
+            $rows = array_map(fn(SecurityAggregateDto $agg) => [
+                $agg->marketTitle,
+                $agg->tradeDate,
+                number_format($agg->value, 2),
+                (string)$agg->volume,
+                (string)$agg->numTrades,
+                $agg->updatedAt,
+            ], $aggregates);
+
+            return $this->outputFormat(
+                $output,
+                $format,
+                ['Market', 'Date', 'Value', 'Volume', 'Trades', 'Updated'],
+                $rows,
+                sprintf('Aggregates for %s', $security)
+            );
         }
 
         return $this->outputTable($output, $security, $aggregates);
@@ -89,28 +107,6 @@ final class SecurityAggregatesCommand extends Command
         }
 
         return $aggregates;
-    }
-
-    /**
-     * @param array<SecurityAggregateDto> $aggregates
-     */
-    private function outputJson(OutputInterface $output, string $security, array $aggregates): int
-    {
-        $data = [
-            'security' => $security,
-            'total' => count($aggregates),
-            'aggregates' => array_map(fn(SecurityAggregateDto $agg) => [
-                'marketTitle' => $agg->marketTitle,
-                'tradeDate' => $agg->tradeDate,
-                'value' => $agg->value,
-                'volume' => $agg->volume,
-                'numTrades' => $agg->numTrades,
-                'updatedAt' => $agg->updatedAt,
-            ], $aggregates),
-        ];
-
-        $output->writeln(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        return Command::SUCCESS;
     }
 
     /**

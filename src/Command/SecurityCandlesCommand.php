@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Moex\Core\Command;
 
+use Moex\Core\Helper\OutputFormatTrait;
 use Moex\Core\Service\Candle\CandleServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final class SecurityCandlesCommand extends Command
 {
+    use OutputFormatTrait;
+
     public function __construct(
         private readonly CandleServiceInterface $candleService,
     ) {
@@ -33,7 +36,8 @@ final class SecurityCandlesCommand extends Command
             ->addOption('from', 'f', InputOption::VALUE_OPTIONAL, 'Start date (Y-m-d)')
             ->addOption('to', 't', InputOption::VALUE_OPTIONAL, 'End date (Y-m-d)')
             ->addOption('interval', 'i', InputOption::VALUE_OPTIONAL, 'Candle interval (minutes)', '60')
-            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Max candles to show', '100');
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Max candles to show', '100')
+            ->addOption('format', 'F', InputOption::VALUE_OPTIONAL, 'Output format: table, json, csv, md', 'table');
     }
 
     #[Override]
@@ -44,6 +48,7 @@ final class SecurityCandlesCommand extends Command
         $to = $input->getOption('to');
         $interval = $input->getOption('interval');
         $limit = (int)$input->getOption('limit');
+        $format = $this->getFormat($input);
 
         $result = $this->candleService->getCandles($ticker, $from, $to, $interval);
 
@@ -57,6 +62,25 @@ final class SecurityCandlesCommand extends Command
         if ($candles === []) {
             $output->writeln('<comment>No candles found</comment>');
             return Command::SUCCESS;
+        }
+
+        if ($format !== 'table') {
+            $rows = array_map(fn($candle) => [
+                $candle->begin->format('Y-m-d H:i'),
+                number_format($candle->open, 2),
+                number_format($candle->high, 2),
+                number_format($candle->low, 2),
+                number_format($candle->close, 2),
+                (string)$candle->volume,
+            ], $candles);
+
+            return $this->outputFormat(
+                $output,
+                $format,
+                ['Time', 'Open', 'High', 'Low', 'Close', 'Volume'],
+                $rows,
+                sprintf('Candles for %s', $ticker)
+            );
         }
 
         $output->writeln(sprintf('<info>Candles for %s:</info>', $ticker));

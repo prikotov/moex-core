@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Moex\Core\Service\Security;
 
-use Generator;
 use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
 use Moex\Core\Service\Security\Dto\SecurityIndexDto;
+use Moex\Core\Service\Security\Dto\SecuritySearchDto;
 use Moex\Core\Service\Security\Dto\SecuritySpecificationDto;
 use Moex\Core\Service\Security\Dto\SecurityTradeDataDto;
 
 interface SecurityServiceInterface
 {
+    public function search(string $query): SecuritySearchResult;
+
     public function getSpecification(string $security): SecuritySpecificationsResult;
 
     public function getTradeData(string $security): SecurityTradeDataResult;

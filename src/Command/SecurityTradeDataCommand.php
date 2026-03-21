@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Moex\Core\Command;
 
+use Moex\Core\Helper\OutputFormatTrait;
 use Moex\Core\Service\Security\SecurityServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -18,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final class SecurityTradeDataCommand extends Command
 {
+    use OutputFormatTrait;
+
     public function __construct(
         private readonly SecurityServiceInterface $securityService,
     ) {
@@ -27,7 +31,9 @@ final class SecurityTradeDataCommand extends Command
     #[Override]
     protected function configure(): void
     {
-        $this->addArgument('security', InputArgument::REQUIRED, 'Security ticker');
+        $this
+            ->addArgument('security', InputArgument::REQUIRED, 'Security ticker')
+            ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: table, json, csv, md', 'table');
     }
 
     #[Override]
@@ -35,11 +41,41 @@ final class SecurityTradeDataCommand extends Command
     {
         /** @var string $security */
         $security = $input->getArgument('security');
+        $format = $this->getFormat($input);
         $result = $this->securityService->getTradeData($security);
 
         if (!$result->success) {
             $output->writeln(sprintf('<error>%s</error>', $result->error ?? 'Unknown error'));
             return Command::FAILURE;
+        }
+
+        if ($format !== 'table') {
+            $rows = [];
+            foreach ($result->securities as $sec) {
+                foreach ($result->marketData as $md) {
+                    $rows[] = [
+                        $sec->secid,
+                        $sec->shortName,
+                        $sec->secName,
+                        $sec->boardId,
+                        number_format($sec->prevPrice, 2),
+                        $md->open !== null ? number_format($md->open, 2) : '',
+                        $md->high !== null ? number_format($md->high, 2) : '',
+                        $md->low !== null ? number_format($md->low, 2) : '',
+                        $md->last !== null ? number_format($md->last, 2) : '',
+                        (string)$md->valToday,
+                        $md->time ?? '',
+                    ];
+                }
+            }
+
+            return $this->outputFormat(
+                $output,
+                $format,
+                ['Ticker', 'ShortName', 'Name', 'Board', 'PrevPrice', 'Open', 'High', 'Low', 'Last', 'Volume', 'Time'],
+                $rows,
+                sprintf('Trade Data for %s', $security)
+            );
         }
 
         foreach ($result->securities as $sec) {

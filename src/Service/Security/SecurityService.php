@@ -8,6 +8,7 @@ use Moex\Core\Component\Moex\MoexIssComponentInterface;
 use Moex\Core\Exception\InfrastructureExceptionInterface;
 use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
 use Moex\Core\Service\Security\Dto\SecurityIndexDto;
+use Moex\Core\Service\Security\Dto\SecuritySearchDto;
 use Moex\Core\Service\Security\Dto\SecuritySpecificationDto;
 use Moex\Core\Service\Security\Dto\SecurityTradeDataDto;
 use Override;
@@ -17,6 +18,45 @@ final class SecurityService implements SecurityServiceInterface
     public function __construct(
         private readonly MoexIssComponentInterface $moexComponent,
     ) {
+    }
+
+    #[Override]
+    public function search(string $query): SecuritySearchResult
+    {
+        try {
+            $content = $this->moexComponent->getContent(
+                'securities',
+                [],
+                [
+                    'q' => $query,
+                    'iss.only' => 'securities',
+                ]
+            );
+        } catch (InfrastructureExceptionInterface $e) {
+            return new SecuritySearchResult(
+                success: false,
+                error: $e->getMessage(),
+            );
+        }
+
+        $data = json_decode($content ?? '', true);
+        $securities = [];
+
+        foreach ($data[1]['securities'] ?? [] as $item) {
+            $securities[] = new SecuritySearchDto(
+                secid: $item['secid'] ?? '',
+                name: $item['name'] ?? '',
+                shortName: $item['shortname'] ?? '',
+                isin: $item['isin'] ?? '',
+                typeName: $item['type'] ?? '',
+                group: $item['group'] ?? '',
+            );
+        }
+
+        return new SecuritySearchResult(
+            success: true,
+            securities: $securities,
+        );
     }
 
     #[Override]
@@ -114,6 +154,13 @@ final class SecurityService implements SecurityServiceInterface
                 last: isset($item['LAST']) ? (float)$item['LAST'] : null,
                 valToday: isset($item['VALTODAY']) ? (int)$item['VALTODAY'] : null,
                 time: $item['TIME'] ?? null,
+            );
+        }
+
+        if (empty($securities) && empty($marketData)) {
+            return new SecurityTradeDataResult(
+                success: false,
+                error: 'Security not found on TQBR board',
             );
         }
 

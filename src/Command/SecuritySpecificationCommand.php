@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Moex\Core\Command;
 
+use Moex\Core\Helper\OutputFormatTrait;
 use Moex\Core\Service\Security\SecurityServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -18,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final class SecuritySpecificationCommand extends Command
 {
+    use OutputFormatTrait;
+
     public function __construct(
         private readonly SecurityServiceInterface $securityService,
     ) {
@@ -27,7 +31,9 @@ final class SecuritySpecificationCommand extends Command
     #[Override]
     protected function configure(): void
     {
-        $this->addArgument('security', InputArgument::REQUIRED, 'Security ticker');
+        $this
+            ->addArgument('security', InputArgument::REQUIRED, 'Security ticker')
+            ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: table, json, csv, md', 'table');
     }
 
     #[Override]
@@ -35,11 +41,36 @@ final class SecuritySpecificationCommand extends Command
     {
         /** @var string $security */
         $security = $input->getArgument('security');
+        $format = $this->getFormat($input);
         $result = $this->securityService->getSpecification($security);
 
         if (!$result->success) {
             $output->writeln(sprintf('<error>%s</error>', $result->error ?? 'Unknown error'));
             return Command::FAILURE;
+        }
+
+        if ($format !== 'table') {
+            $rows = array_map(fn($spec) => [
+                $spec->secid,
+                $spec->shortName,
+                $spec->isin,
+                $spec->regNumber,
+                $spec->typeName,
+                $spec->group,
+                (string)$spec->listLevel,
+                $spec->issueDate,
+                $spec->faceValue ?? '',
+                $spec->faceUnit ?? '',
+                $spec->issueSize !== null ? (string)$spec->issueSize : '',
+            ], $result->specifications);
+
+            return $this->outputFormat(
+                $output,
+                $format,
+                ['Ticker', 'Name', 'ISIN', 'RegNumber', 'Type', 'Group', 'List', 'IssueDate', 'FaceValue', 'Currency', 'IssueSize'],
+                $rows,
+                sprintf('Specification for %s', $security)
+            );
         }
 
         foreach ($result->specifications as $spec) {
