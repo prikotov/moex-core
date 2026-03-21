@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Moex\Core\Command;
 
+use Moex\Core\Service\Security\Dto\SecurityAggregateDto;
 use Moex\Core\Service\Security\SecurityServiceInterface;
 use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -30,7 +31,11 @@ final class SecurityAggregatesCommand extends Command
     {
         $this
             ->addArgument('security', InputArgument::REQUIRED, 'Security ticker')
-            ->addOption('date', 'd', InputOption::VALUE_OPTIONAL, 'Date (YYYY-MM-DD)');
+            ->addOption('date', 'd', InputOption::VALUE_OPTIONAL, 'Date (YYYY-MM-DD)')
+            ->addOption('sort', 's', InputOption::VALUE_OPTIONAL, 'Sort by: value, volume, trades, date', 'date')
+            ->addOption('order', 'o', InputOption::VALUE_OPTIONAL, 'Sort order: asc, desc', 'desc')
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Limit number of results', '0')
+            ->addOption('format', 'f', InputOption::VALUE_OPTIONAL, 'Output format: table, json', 'table');
     }
 
     #[Override]
@@ -40,6 +45,10 @@ final class SecurityAggregatesCommand extends Command
         $security = $input->getArgument('security');
         /** @var string|null $date */
         $date = $input->getOption('date');
+        $sort = $input->getOption('sort');
+        $order = $input->getOption('order');
+        $limit = (int)$input->getOption('limit');
+        $format = $input->getOption('format');
 
         $result = $this->securityService->getAggregates($security, $date);
 
@@ -48,10 +57,71 @@ final class SecurityAggregatesCommand extends Command
             return Command::FAILURE;
         }
 
+        $aggregates = $this->sortAggregates($result->aggregates, $sort, $order);
+        if ($limit > 0) {
+            $aggregates = array_slice($aggregates, 0, $limit);
+        }
+
+        if ($format === 'json') {
+            return $this->outputJson($output, $security, $aggregates);
+        }
+
+        return $this->outputTable($output, $security, $aggregates);
+    }
+
+    /**
+     * @param array<SecurityAggregateDto> $aggregates
+     * @return array<SecurityAggregateDto>
+     */
+    private function sortAggregates(array $aggregates, string $sort, string $order): array
+    {
+        $comparator = match ($sort) {
+            'value' => fn(SecurityAggregateDto $a, SecurityAggregateDto $b) => $a->value <=> $b->value,
+            'volume' => fn(SecurityAggregateDto $a, SecurityAggregateDto $b) => $a->volume <=> $b->volume,
+            'trades' => fn(SecurityAggregateDto $a, SecurityAggregateDto $b) => $a->numTrades <=> $b->numTrades,
+            default => fn(SecurityAggregateDto $a, SecurityAggregateDto $b) => strcmp($a->tradeDate, $b->tradeDate),
+        };
+
+        usort($aggregates, $comparator);
+
+        if ($order === 'desc') {
+            $aggregates = array_reverse($aggregates);
+        }
+
+        return $aggregates;
+    }
+
+    /**
+     * @param array<SecurityAggregateDto> $aggregates
+     */
+    private function outputJson(OutputInterface $output, string $security, array $aggregates): int
+    {
+        $data = [
+            'security' => $security,
+            'total' => count($aggregates),
+            'aggregates' => array_map(fn(SecurityAggregateDto $agg) => [
+                'marketTitle' => $agg->marketTitle,
+                'tradeDate' => $agg->tradeDate,
+                'value' => $agg->value,
+                'volume' => $agg->volume,
+                'numTrades' => $agg->numTrades,
+                'updatedAt' => $agg->updatedAt,
+            ], $aggregates),
+        ];
+
+        $output->writeln(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @param array<SecurityAggregateDto> $aggregates
+     */
+    private function outputTable(OutputInterface $output, string $security, array $aggregates): int
+    {
         $output->writeln(sprintf('<info>Aggregates for %s</info>', $security));
         $output->writeln('');
 
-        foreach ($result->aggregates as $agg) {
+        foreach ($aggregates as $agg) {
             $output->writeln(sprintf('<comment>%s</comment>', $agg->marketTitle));
             $output->writeln(sprintf('  Trade Date: %s', $agg->tradeDate));
             $output->writeln(sprintf('  Value: %.2f', $agg->value));
