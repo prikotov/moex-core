@@ -70,6 +70,8 @@ final class CandleService implements CandleServiceInterface
             );
         }
 
+        usort($candles, fn(CandleDto $a, CandleDto $b) => $a->begin <=> $b->begin);
+
         return new CandlesResult(
             success: true,
             candles: $candles,
