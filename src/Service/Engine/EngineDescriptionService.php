@@ -65,21 +65,11 @@ final class EngineDescriptionService implements EngineDescriptionServiceInterfac
                 continue;
             }
 
-            $block = $element[$blockName];
-
-            if (!is_array($block)) {
-                throw new InfrastructureException(sprintf(
-                    'Block "%s" is not an array in MOEX ISS engine description response (engine: %s)',
-                    $blockName,
-                    $engine
-                ));
-            }
-
-            $rows = $block['data'] ?? null;
+            $rows = $element[$blockName];
 
             if (!is_array($rows)) {
                 throw new InfrastructureException(sprintf(
-                    'Block "%s" has no data array in MOEX ISS engine description response (engine: %s)',
+                    'Block "%s" is not a list of rows in MOEX ISS engine description response (engine: %s)',
                     $blockName,
                     $engine
                 ));

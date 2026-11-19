@@ -6,11 +6,14 @@ namespace Moex\Core\Tests\Service\Engine;
 
 use Moex\Core\Component\Moex\MoexIssComponentInterface;
 use Moex\Core\Exception\InfrastructureException;
-use Moex\Core\Service\Engine\Dto\EngineDescriptionRawDto;
 use Moex\Core\Service\Engine\EngineDescriptionService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Форма payload повторяет живой ответ ISS на engines/stock.json?iss.meta=off&iss.json=extended:
+ * второй элемент массива содержит блоки engine/timetable/dailytable как списки ассоциативных строк.
+ */
 final class EngineDescriptionServiceTest extends TestCase
 {
     private MoexIssComponentInterface&MockObject $moexComponent;
@@ -26,52 +29,42 @@ final class EngineDescriptionServiceTest extends TestCase
     {
         $json = json_encode([
             0 => [
-                'engine' => [
-                    'columns' => ['NAME', 'TITLE', 'SHORTNAME'],
-                    'data' => [
-                        [
-                            'NAME' => 'stock',
-                            'TITLE' => 'Фондовый рынок и рынок депозитарных акций',
-                            'SHORTNAME' => 'Фондовый рынок',
-                        ],
-                    ],
-                ],
+                'charsetinfo' => ['name' => 'utf-8'],
             ],
             1 => [
-                'timetable' => [
-                    'columns' => ['WEEKDAY', 'IS_WORK_DAY', 'START_TIME', 'STOP_TIME'],
-                    'data' => [
-                        [
-                            'WEEKDAY' => 1,
-                            'IS_WORK_DAY' => 1,
-                            'START_TIME' => '10:00:00',
-                            'STOP_TIME' => '18:40:00',
-                        ],
-                        [
-                            'WEEKDAY' => 6,
-                            'IS_WORK_DAY' => 0,
-                            'START_TIME' => '00:00:00',
-                            'STOP_TIME' => null,
-                        ],
+                'engine' => [
+                    [
+                        'NAME' => 'stock',
+                        'title' => 'Фондовый рынок и рынок депозитов',
+                        'short_title' => 'ФБ',
                     ],
                 ],
-            ],
-            2 => [
+                'timetable' => [
+                    [
+                        'week_day' => 1,
+                        'is_work_day' => 1,
+                        'start_time' => '10:00:00',
+                        'stop_time' => '18:40:00',
+                    ],
+                    [
+                        'week_day' => 6,
+                        'is_work_day' => 0,
+                        'start_time' => '00:00:00',
+                        'stop_time' => null,
+                    ],
+                ],
                 'dailytable' => [
-                    'columns' => ['DATE', 'IS_WORK_DAY', 'START_TIME', 'STOP_TIME'],
-                    'data' => [
-                        [
-                            'DATE' => '2024-01-15',
-                            'IS_WORK_DAY' => 1,
-                            'START_TIME' => '10:00:00',
-                            'STOP_TIME' => '18:40:00',
-                        ],
-                        [
-                            'DATE' => '2024-01-20',
-                            'IS_WORK_DAY' => '0',
-                            'START_TIME' => '',
-                            'STOP_TIME' => null,
-                        ],
+                    [
+                        'date' => '2024-01-15',
+                        'is_work_day' => 1,
+                        'start_time' => '10:00:00',
+                        'stop_time' => '18:40:00',
+                    ],
+                    [
+                        'date' => '2024-01-20',
+                        'is_work_day' => '0',
+                        'start_time' => '',
+                        'stop_time' => null,
                     ],
                 ],
             ],
@@ -85,43 +78,41 @@ final class EngineDescriptionServiceTest extends TestCase
 
         $result = $this->service->getEngineDescription('stock');
 
-        $this->assertInstanceOf(EngineDescriptionRawDto::class, $result);
-
         $this->assertSame([
             [
                 'NAME' => 'stock',
-                'TITLE' => 'Фондовый рынок и рынок депозитарных акций',
-                'SHORTNAME' => 'Фондовый рынок',
+                'title' => 'Фондовый рынок и рынок депозитов',
+                'short_title' => 'ФБ',
             ],
         ], $result->engine);
 
         $this->assertSame([
             [
-                'WEEKDAY' => 1,
-                'IS_WORK_DAY' => 1,
-                'START_TIME' => '10:00:00',
-                'STOP_TIME' => '18:40:00',
+                'week_day' => 1,
+                'is_work_day' => 1,
+                'start_time' => '10:00:00',
+                'stop_time' => '18:40:00',
             ],
             [
-                'WEEKDAY' => 6,
-                'IS_WORK_DAY' => 0,
-                'START_TIME' => '00:00:00',
-                'STOP_TIME' => null,
+                'week_day' => 6,
+                'is_work_day' => 0,
+                'start_time' => '00:00:00',
+                'stop_time' => null,
             ],
         ], $result->timetable);
 
         $this->assertSame([
             [
-                'DATE' => '2024-01-15',
-                'IS_WORK_DAY' => 1,
-                'START_TIME' => '10:00:00',
-                'STOP_TIME' => '18:40:00',
+                'date' => '2024-01-15',
+                'is_work_day' => 1,
+                'start_time' => '10:00:00',
+                'stop_time' => '18:40:00',
             ],
             [
-                'DATE' => '2024-01-20',
-                'IS_WORK_DAY' => '0',
-                'START_TIME' => '',
-                'STOP_TIME' => null,
+                'date' => '2024-01-20',
+                'is_work_day' => '0',
+                'start_time' => '',
+                'stop_time' => null,
             ],
         ], $result->dailytable);
     }
@@ -130,16 +121,13 @@ final class EngineDescriptionServiceTest extends TestCase
     {
         $json = json_encode([
             0 => [
-                'engine' => [
-                    'data' => [
-                        ['NAME' => 'stock', 'TITLE' => 'Фондовый рынок', 'SHORTNAME' => 'Фондовый рынок'],
-                    ],
-                ],
+                'charsetinfo' => ['name' => 'utf-8'],
             ],
             1 => [
-                'timetable' => [
-                    'data' => [],
+                'engine' => [
+                    ['NAME' => 'stock', 'title' => 'Фондовый рынок', 'short_title' => 'ФБ'],
                 ],
+                'timetable' => [],
             ],
         ]);
 
@@ -159,14 +147,11 @@ final class EngineDescriptionServiceTest extends TestCase
     {
         $json = json_encode([
             0 => [
-                'timetable' => [
-                    'data' => [],
-                ],
+                'charsetinfo' => ['name' => 'utf-8'],
             ],
             1 => [
-                'dailytable' => [
-                    'data' => [],
-                ],
+                'timetable' => [],
+                'dailytable' => [],
             ],
         ]);
 
@@ -181,26 +166,43 @@ final class EngineDescriptionServiceTest extends TestCase
         $this->service->getEngineDescription('stock');
     }
 
-    public function testGetEngineDescriptionReturnsEmptyDailytableRowsForEmptyData(): void
+    public function testGetEngineDescriptionThrowsWhenTimetableBlockMissing(): void
     {
         $json = json_encode([
             0 => [
-                'engine' => [
-                    'data' => [
-                        ['NAME' => 'stock', 'TITLE' => 'Фондовый рынок', 'SHORTNAME' => 'Фондовый рынок'],
-                    ],
-                ],
+                'charsetinfo' => ['name' => 'utf-8'],
             ],
             1 => [
-                'timetable' => [
-                    'data' => [],
+                'engine' => [
+                    ['NAME' => 'stock', 'title' => 'Фондовый рынок', 'short_title' => 'ФБ'],
                 ],
+                'dailytable' => [],
             ],
-            2 => [
-                'dailytable' => [
-                    'columns' => ['DATE', 'IS_WORK_DAY', 'START_TIME', 'STOP_TIME'],
-                    'data' => [],
+        ]);
+
+        $this->moexComponent
+            ->expects($this->once())
+            ->method('getContent')
+            ->willReturn($json);
+
+        $this->expectException(InfrastructureException::class);
+        $this->expectExceptionMessage('Block "timetable" not found');
+
+        $this->service->getEngineDescription('stock');
+    }
+
+    public function testGetEngineDescriptionReturnsEmptyDailytableRowsForEmptyList(): void
+    {
+        $json = json_encode([
+            0 => [
+                'charsetinfo' => ['name' => 'utf-8'],
+            ],
+            1 => [
+                'engine' => [
+                    ['NAME' => 'stock', 'title' => 'Фондовый рынок', 'short_title' => 'ФБ'],
                 ],
+                'timetable' => [],
+                'dailytable' => [],
             ],
         ]);
 
@@ -216,23 +218,16 @@ final class EngineDescriptionServiceTest extends TestCase
         $this->assertSame([], $result->timetable);
     }
 
-    public function testGetEngineDescriptionThrowsWhenBlockHasNoDataArray(): void
+    public function testGetEngineDescriptionThrowsWhenBlockIsNotAListOfRows(): void
     {
         $json = json_encode([
             0 => [
-                'engine' => [
-                    'data' => [],
-                ],
+                'charsetinfo' => ['name' => 'utf-8'],
             ],
             1 => [
-                'timetable' => [
-                    'data' => [],
-                ],
-            ],
-            2 => [
-                'dailytable' => [
-                    'columns' => ['DATE', 'IS_WORK_DAY', 'START_TIME', 'STOP_TIME'],
-                ],
+                'engine' => [],
+                'timetable' => [],
+                'dailytable' => 'not-a-list',
             ],
         ]);
 
@@ -242,7 +237,7 @@ final class EngineDescriptionServiceTest extends TestCase
             ->willReturn($json);
 
         $this->expectException(InfrastructureException::class);
-        $this->expectExceptionMessage('Block "dailytable" has no data array');
+        $this->expectExceptionMessage('Block "dailytable" is not a list of rows');
 
         $this->service->getEngineDescription('stock');
     }
