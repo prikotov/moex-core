@@ -67,7 +67,8 @@ final class SecuritySpecificationCommand extends Command
             return $this->outputFormat(
                 $output,
                 $format,
-                ['Ticker', 'Name', 'ISIN', 'RegNumber', 'Type', 'Group', 'List', 'IssueDate', 'FaceValue', 'Currency', 'IssueSize'],
+                ['Ticker', 'Name', 'ISIN', 'RegNumber', 'Type', 'Group', 'List', 'IssueDate', 'FaceValue', 'Currency',
+                    'IssueSize'],
                 $rows,
                 sprintf('Specification for %s', $security)
             );

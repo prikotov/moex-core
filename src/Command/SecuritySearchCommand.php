@@ -87,7 +87,11 @@ final class SecuritySearchCommand extends Command
         }
 
         $output->writeln('');
-        $output->writeln(sprintf('<comment>Total: %d (showing %d)</comment>', count($result->securities), count($securities)));
+        $output->writeln(sprintf(
+            '<comment>Total: %d (showing %d)</comment>',
+            count($result->securities),
+            count($securities)
+        ));
 
         return Command::SUCCESS;
     }
