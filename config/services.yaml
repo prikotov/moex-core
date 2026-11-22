@@ -20,6 +20,7 @@ services:
             - '../src/Service/Candle/Dto/*'
             - '../src/Service/Candle/*Result.php'
             - '../src/Service/Engine/Dto/*'
+            - '../src/Service/Index/Dto/*'
 
     Moex\Core\Command\:
         resource: '../src/Command/*'
